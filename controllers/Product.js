@@ -784,6 +784,37 @@ const FindProductByNameFromToMoney = async (req, res, next) => {
   }
 };
 
+const GetAllProductHot = async (req, res, next) => {
+  try {
+    const allProduct = await Product.find({});
+    const arr = [];
+
+    for (let index = 0; index < allProduct.length; index++) {
+      let quan = 0;
+      const findOrderDetail = await OrderDetail.find({
+        productID: allProduct[index]._id,
+      });
+      for (let i = 0; i < findOrderDetail.length; i++) {
+        quan += findOrderDetail[i].quantity;
+      }
+      arr.push({
+        pid: allProduct[index]._id,
+        quan: quan,
+      });
+    }
+    arr.sort(function (a, b) {
+      return b.quan - a.quan;
+    });
+    return res.json({
+      success: true,
+      message: "Get All Product Success!!!",
+      result: arr.slice(0, 4),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   AddProduct,
   UpdateProduct,
@@ -801,4 +832,5 @@ module.exports = {
   FindProductByNameBrand,
   FindProductByNameBrandCategory,
   FindProductByNameFromToMoney,
+  GetAllProductHot,
 };

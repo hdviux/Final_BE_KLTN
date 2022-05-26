@@ -53,4 +53,8 @@ router.post(
   "/findproductbynamefromtomoney",
   ProductController.FindProductByNameFromToMoney
 );
+router.post(
+  "/getallproducthot",
+  ProductController.GetAllProductHot
+);
 module.exports = router;
