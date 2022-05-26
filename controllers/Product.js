@@ -805,10 +805,17 @@ const GetAllProductHot = async (req, res, next) => {
     arr.sort(function (a, b) {
       return b.quan - a.quan;
     });
+    let arr2=[];
+    for (let index = 0; index < 4; index++) {
+      const findProduct = await Product.findOne({
+        _id:arr[index].pid,
+      });
+      arr2.push(findProduct)
+    }
     return res.json({
       success: true,
       message: "Get All Product Success!!!",
-      result: arr.slice(0, 4),
+      result: arr2,
     });
   } catch (error) {
     next(error);
