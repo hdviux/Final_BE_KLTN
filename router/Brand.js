@@ -1,0 +1,14 @@
+const express = require("express");
+const router = express.Router();
+const BrandController = require("../controllers/Brand");
+const verifyToken = require("../middleware/auth");
+router.post("/addbrand", verifyToken.verifyToken, BrandController.AddBrand);
+router.put("/updatebrand/:brandID", verifyToken.verifyToken, BrandController.UpdateBrand);
+router.delete("/deletebrand/:brandID", verifyToken.verifyToken, BrandController.DeleteBrand);
+router.post("/findbrandbyname", verifyToken.verifyToken, BrandController.FindBrandByName);
+router.post("/findbrandbynation", verifyToken.verifyToken, BrandController.FindBrandByNation);
+router.post("/findbrandbyid", verifyToken.verifyToken, BrandController.FindBrandByID);
+router.get("/getallbrand", BrandController.GetAllBrand);
+router.post("/findbrandbyidproduct", BrandController.FindBrandByIDProduct);
+router.post("/findbrandbynamechar", verifyToken.verifyToken, BrandController.FindBrandByNameChar);
+module.exports = router;
