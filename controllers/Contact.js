@@ -11,10 +11,10 @@ const sendMailFeedback = async (req, res, next) => {
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
     await sgMail.send({
-      from: process.env.NODEMAILER_EMAIL,
       to: process.env.EMAIL_TOYSKID,
+      from: process.env.NODEMAILER_EMAIL,
       subject: "Phản hồi từ ToysKid",
-      subject:
+      text:
         "Phản hồi từ email: " +
         `${email}` +
         "(Có tên: " +
@@ -24,9 +24,10 @@ const sendMailFeedback = async (req, res, next) => {
       html: `${content}`,
     });
     await sgMail.send({
-      from: process.env.NODEMAILER_EMAIL,
       to: `${email}`,
-      html: "Xin chào,<br> Web Toyskid đã nhận phản hồi từ bạn, chúng tôi sẽ sớm liên hệ với bạn.",
+      from: process.env.NODEMAILER_EMAIL,
+      subject: "Phản hồi từ ToysKid",
+      html: `Xin chào,<br> Web Toyskid đã nhận phản hồi từ bạn, chúng tôi sẽ sớm liên hệ với bạn.`,
     });
     const newContact = new Contact({
       name,
@@ -34,6 +35,7 @@ const sendMailFeedback = async (req, res, next) => {
       content,
     });
     newContact.save();
+
     return res.status(200).json({
       Status: "success",
       message: "Gửi phản hồi thành công!!!",
@@ -43,6 +45,7 @@ const sendMailFeedback = async (req, res, next) => {
     next(error);
   }
 };
+
 const getAllContact = async (req, res, next) => {
   try {
     const result = await Contact.find({});
@@ -64,10 +67,10 @@ const AdminSendMail = async (req, res, next) => {
     if (!content || !email)
       return res
         .status(400)
-        .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
+        .json({ error: { message: "Chưa điền đầy đủ thông tin!" } }); 
     await sgMail.send({
+      to: `${email}`,
       from: process.env.NODEMAILER_EMAIL,
-      to: email,
       subject: "Phản hồi từ ToysKid",
       html: `${content}`,
     });
@@ -80,4 +83,8 @@ const AdminSendMail = async (req, res, next) => {
   }
 };
 
-module.exports = { sendMailFeedback, getAllContact, AdminSendMail };
+module.exports = {
+  sendMailFeedback,
+  getAllContact,
+  AdminSendMail,
+};

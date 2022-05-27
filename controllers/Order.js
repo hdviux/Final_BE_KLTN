@@ -219,65 +219,66 @@ const SendOrderEmail = async (req, res, next) => {
     }
     const foundUserReceived = await User.findOne({ _id: findOrder.userID });
     await sgMail.send({
-      from: process.env.NODEMAILER_EMAIL,
       to: `${foundUserReceived.email}`,
+      from: process.env.NODEMAILER_EMAIL,
       subject: "Hóa đơn mua hàng từ Toyskid",
       html: `<!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-        table {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-        
-        td, th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #dddddd;
-        }
-        </style>
-        </head>
-        <body>
-        <div>
-       <strong> Mã hóa đơn: ${orderID}</strong>
-    <br><strong> Tên người mua: ${foundUserReceived.userName}</strong>
-    <br><strong> Số điện thoại: ${foundUserReceived.phone}</strong>
-    <br><strong> Địa chỉ: ${foundUserReceived.address}</strong>
-    <br><strong> Ngày gửi: ${findOrder.dateCreated}</strong>
-    <br><strong> Tổng tiền: ${findOrder.totalMoney}₫</strong>
-    <br><strong> Chi tiết hóa đơn: 
-    <br>
-    <table>
-         <tr>
-            <th>Mã sản phẩm</th>
-            <th>Tên sản phẩm</th>
-            <th>giá gốc</th>
-            <th>Số lượng</th>
-            <th>Tổng tiền</th>
-         </tr>
-       ${ar.map(
-         (data) =>
-           `<tr>
-            <td>${data._id}</td>
-            <td>${data.productName}</td>
-            <td>${data.uniCost}</td>
-            <td>${data.quantity}</td>
-            <td>${data.totalMoney}</td>
-          </tr>`
-       )}
-    </table >
-    <br>
-    Hình thức thanh toán: ${pay}
-        </div>
-        </body>
+      <html>
+      <head>
+      <style>
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      
+      td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      
+      tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+      </style>
+      </head>
+      <body>
+      <div>
+     <strong> Mã hóa đơn: ${orderID}</strong>
+  <br><strong> Tên người mua: ${foundUserReceived.userName}</strong>
+  <br><strong> Số điện thoại: ${foundUserReceived.phone}</strong>
+  <br><strong> Địa chỉ: ${foundUserReceived.address}</strong>
+  <br><strong> Ngày gửi: ${findOrder.dateCreated}</strong>
+  <br><strong> Tổng tiền: ${findOrder.totalMoney}₫</strong>
+  <br><strong> Chi tiết hóa đơn: 
+  <br>
+  <table>
+       <tr>
+          <th>Mã sản phẩm</th>
+          <th>Tên sản phẩm</th>
+          <th>giá gốc</th>
+          <th>Số lượng</th>
+          <th>Tổng tiền</th>
+       </tr>
+     ${ar.map(
+       (data) =>
+         `<tr>
+          <td>${data._id}</td>
+          <td>${data.productName}</td>
+          <td>${data.uniCost}</td>
+          <td>${data.quantity}</td>
+          <td>${data.totalMoney}</td>
+        </tr>`
+     )}
+  </table >
+  <br>
+  Hình thức thanh toán: ${pay}
+      </div>
+      </body>
 </html>`,
     });
+
     return res.json({
       status: 200,
       message: "Gửi hóa đơn thành công!!!",
