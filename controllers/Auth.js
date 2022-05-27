@@ -211,8 +211,6 @@ const sendVerifyEmail = async (req, res, next) => {
       port: 465,
       auth: {
         type: "OAuth2",
-        user: "user@example.com",
-        accessToken: "ya29.Xx_XX0xxxxx-xX0X0XxXXxXxXXXxX0x",
       },
     });
     await transporter.sendMail({
