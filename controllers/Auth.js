@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const EmailCode = require("../models/EmailCode");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -206,7 +207,16 @@ const verifyOTPPhone = async (req, res, next) => {
 const sendVerifyEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const code = JSON.stringify(Math.floor(1000 + Math.random() * 9000));
+    const code = JSON.stringify(Math.floor(100000 + Math.random() * 900000));
+    const findEmailCode = await EmailCode.findOne({ email: email });
+    if (findEmailCode) {
+      await EmailCode.deleteOne({ email: email });
+    }
+    const newUser = new EmailCode({
+      code: code,
+      email: email,
+    });
+    await newUser.save();
     await sgMail.send({
       to: `${email}`,
       from: process.env.NODEMAILER_EMAIL,
@@ -218,6 +228,29 @@ const sendVerifyEmail = async (req, res, next) => {
       message: "Gửi mã xác nhận thành công!!!",
       code: code,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const checkVerifyEmail = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+    const findEmailCode = await EmailCode.findOne({ email: email, code: code });
+    if (findEmailCode) {
+      await EmailCode.deleteOne({ email: email, code: code });
+      return res.json({
+        status: 200,
+        message: "Mã xác nhận chính xác!!!",
+      });
+    }
+
+    if (!findEmailCode) {
+      return res.json({
+        status: 400,
+        message: "Mã xác nhận không chính xác!!!",
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -323,4 +356,5 @@ module.exports = {
   checkPhone,
   checkEmail,
   forgetPassword,
+  checkVerifyEmail,
 };

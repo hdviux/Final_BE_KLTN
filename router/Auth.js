@@ -7,6 +7,7 @@ router.post("/signinbyphone", AuthController.signInByPhone);
 router.post("/signinbyemail", AuthController.signInByEmail);
 router.post("/sendotpphone", AuthController.sendOTPPhone);
 router.post("/verifyotpphone", AuthController.verifyOTPPhone);
+router.post("/checkverifyemail", AuthController.checkVerifyEmail);
 router.post("/sendverifyemail", AuthController.sendVerifyEmail);
 router.post("/refreshToken", AuthController.refreshToken);
 router.post("/logout", AuthController.logout);
