@@ -210,8 +210,9 @@ const sendVerifyEmail = async (req, res, next) => {
       host: "smtp.gmail.com",
       port: 465,
       auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD,
+        type: "OAuth2",
+        user: "user@example.com",
+        accessToken: "ya29.Xx_XX0xxxxx-xX0X0XxXXxXxXXXxX0x",
       },
     });
     await transporter.sendMail({
