@@ -2,7 +2,8 @@ const Order = require("../models/Order");
 const User = require("../models/User");
 const OrderDetail = require("../models/OrderDetail");
 const Product = require("../models/Product");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const AddOrder = async (req, res, next) => {
   try {
     const foundUser = await User.findOne({ _id: req.userID });
@@ -217,15 +218,7 @@ const SendOrderEmail = async (req, res, next) => {
       });
     }
     const foundUserReceived = await User.findOne({ _id: findOrder.userID });
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD,
-      },
-    });
-    await transporter.sendMail({
+    await sgMail.send({
       from: process.env.NODEMAILER_EMAIL,
       to: `${foundUserReceived.email}`,
       subject: "Hóa đơn mua hàng từ Toyskid",

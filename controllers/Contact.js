@@ -1,8 +1,8 @@
 const Contact = require("../models/Contact");
 const User = require("../models/User");
-
 require("dotenv").config();
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const sendMailFeedback = async (req, res, next) => {
   try {
     const { name, email, content } = req.body;
@@ -10,15 +10,7 @@ const sendMailFeedback = async (req, res, next) => {
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD,
-      },
-    });
-    await transporter.sendMail({
+    await sgMail.send({
       from: process.env.NODEMAILER_EMAIL,
       to: process.env.EMAIL_TOYSKID,
       subject: "Phản hồi từ ToysKid",
@@ -31,7 +23,7 @@ const sendMailFeedback = async (req, res, next) => {
         " đến Toyskid",
       html: `${content}`,
     });
-    await transporter.sendMail({
+    await sgMail.send({
       from: process.env.NODEMAILER_EMAIL,
       to: `${email}`,
       html: "Xin chào,<br> Web Toyskid đã nhận phản hồi từ bạn, chúng tôi sẽ sớm liên hệ với bạn.",
@@ -73,15 +65,7 @@ const AdminSendMail = async (req, res, next) => {
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD,
-      },
-    });
-    await transporter.sendMail({
+    await sgMail.send({
       from: process.env.NODEMAILER_EMAIL,
       to: email,
       subject: "Phản hồi từ ToysKid",

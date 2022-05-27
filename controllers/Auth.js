@@ -7,7 +7,8 @@ const serviceId = process.env.TWILIO_SERVICE_SID;
 const sidkey = process.env.TWILIO_API_KEY;
 const secret = process.env.TWILIO_API_SECRET;
 const twilioClient = require("twilio")(sidkey, secret, { accountSid });
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 let rfToken = [];
 
 const signUpByEmail = async (req, res, next) => {
@@ -206,17 +207,9 @@ const sendVerifyEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
     const code = JSON.stringify(Math.floor(1000 + Math.random() * 9000));
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        type: "OAuth2",
-      },
-    });
-    await transporter.sendMail({
-      from: process.env.NODEMAILER_EMAIL,
+    await sgMail.send({
       to: `${email}`,
+      from: process.env.NODEMAILER_EMAIL,
       subject: "Web Toyskid gửi mã xác nhận",
       html: "Xin chào,<br> Mã xác nhận của bạn là:<br>" + code,
     });
