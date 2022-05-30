@@ -88,7 +88,20 @@ const UpdateOrderStatus = async (req, res, next) => {
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    await Order.findByIdAndUpdate(orderID, { orderStatus: orderStatus });
+    if (orderStatus === "received") {
+      await Order.findByIdAndUpdate(orderID, { orderStatus: orderStatus });
+      const findOrderDetail = await OrderDetail.find({ orderID: orderID });
+      for (let index = 0; index < findOrderDetail.length; index++) {
+        const findProduct = Product.findOne({
+          _id: findOrderDetail[index].productID,
+        });
+        await Product.findByIdAndUpdate(findProduct._id, {
+          quantity: findOrderDetail[index].quantity,
+        });
+      }
+    } else {
+      await Order.findByIdAndUpdate(orderID, { orderStatus: orderStatus });
+    }
     return res.json({
       success: true,
       message: "Update Order Success!!!",
