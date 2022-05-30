@@ -88,7 +88,7 @@ const UpdateOrderStatus = async (req, res, next) => {
       return res
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
-    if (orderStatus === "received") {
+    if (orderStatus === "refund") {
       await Order.findByIdAndUpdate(orderID, { orderStatus: orderStatus });
       const findOrderDetail = await OrderDetail.find({ orderID: orderID });
       for (let index = 0; index < findOrderDetail.length; index++) {
