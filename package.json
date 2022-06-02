@@ -26,6 +26,7 @@
     "nodemailer": "^6.7.2",
     "nodemon": "^2.0.15",
     "path": "^0.12.7",
+    "paypal-rest-sdk": "^1.8.1",
     "twilio": "^3.75.1",
     "uuid": "^8.3.2"
   }

@@ -343,6 +343,52 @@ const forgetPassword = async (req, res, next) => {
   }
 };
 
+const signInByOnceEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    const accessToken = jwt.sign(
+      { userID: user._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "24h" }
+    );
+    const refreshToken = jwt.sign(
+      { userID: user._id },
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    rfToken.push(refreshToken);
+
+    return res.json({
+      accessToken,
+      refreshToken,
+      user,
+      status: 200,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const signUpByOnceEmail = async (req, res, next) => {
+  try {
+    const { fullName, userName, email, password, avatar } = req.body;
+    const newUser = new User({
+      fullName,
+      userName,
+      email,
+      password,
+      avatar,
+    });
+    await newUser.save();
+    return res.json({
+      success: true,
+      message: "Create User By Email Success!!!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   signUpByEmail,
   signUpByPhone,
@@ -357,4 +403,6 @@ module.exports = {
   checkEmail,
   forgetPassword,
   checkVerifyEmail,
+  signInByOnceEmail,
+  signUpByOnceEmail,
 };

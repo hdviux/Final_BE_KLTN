@@ -48,4 +48,6 @@ router.post(
   verifyToken.verifyToken,
   OrderController.GetCostEachUser
 );
+router.post("/getorderbystatus", OrderController.GetOrderByStatus);
+router.post("/getchart", OrderController.GetChart);
 module.exports = router;

@@ -6,9 +6,11 @@ const ProductSchema = new Schema(
     productName: {
       type: String,
     },
-    image: [{
-      type: String,
-    }],
+    image: [
+      {
+        type: String,
+      },
+    ],
     quantity: {
       type: Number,
     },
@@ -18,9 +20,11 @@ const ProductSchema = new Schema(
     description: {
       type: String,
     },
-    color: [{
-      type: String,
-    }],
+    color: [
+      {
+        type: String,
+      },
+    ],
     categoryID: {
       type: Schema.Types.ObjectId,
       ref: "Category",
@@ -28,6 +32,9 @@ const ProductSchema = new Schema(
     brandID: {
       type: Schema.Types.ObjectId,
       ref: "Brand",
+    },
+    age: {
+      type: String,
     },
   },
   { timestamps: true }

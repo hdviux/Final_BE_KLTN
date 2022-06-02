@@ -13,31 +13,48 @@ const AddCart = async (req, res, next) => {
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
-    const newCart = new Cart({
-      productID,
-      userID: foundUser._id,
-      quantity,
+
+    const findCart = await Cart.findOne({
+      productID: productID,
+      userID: req.userID,
     });
-    const result = await newCart.save();
-    const findCart = await Cart.find({ productID: result.productID });
-    if (findCart.length === 1) {
-      return res.json({
-        success: true,
-        message: "Add New Cart Success!!!",
-        result,
+    if (!findCart) {
+      const newCart = new Cart({
+        productID,
+        userID: foundUser._id,
+        quantity,
       });
-    }
-    if (findCart.length !== 1) {
-      const findProduct = await Product.find({ _id: productID });
-      await Cart.findByIdAndUpdate(findCart[0]._id, { quantity: findCart[0].quantity + findCart[1].quantity });
-      await Cart.deleteOne({ _id: result._id });
-      return res.json({
-        success: true,
-        message: "Update New Cart Success!!!",
-        result: findCart[0],
-      });
+      const result = await newCart.save();
+      if (findCart.length === 1) {
+        return res.json({
+          success: true,
+          message: "Add New Cart Success!!!",
+          result,
+        });
+      }
     }
 
+    if (findCart) {
+      const findProduct = await Product.findOne({ _id: productID });
+      if (findCart.quantity + quantity > findProduct.quantity) {
+        await Cart.findByIdAndUpdate(findCart._id, {
+          quantity: findProduct.quantity,
+        });
+        return res.json({
+          success: true,
+          message: "Update New Cart Success!!!",
+        });
+      }
+      if (findCart.quantity + quantity <= findProduct.quantity) {
+        await Cart.findByIdAndUpdate(findCart._id, {
+          quantity: findCart.quantity + quantity,
+        });
+        return res.json({
+          success: true,
+          message: "Update New Cart Success!!!",
+        });
+      }
+    }
   } catch (error) {
     next(error);
   }
@@ -138,15 +155,21 @@ const FindCartByName = async (req, res, next) => {
     const result = await Cart.find({ userID: foundUser._id });
     const listProduct = [];
     for (let index = 0; index < result.length; index++) {
-      const findProduct = await Product.findOne({ _id: result[index].productID });
+      const findProduct = await Product.findOne({
+        _id: result[index].productID,
+      });
       listProduct.push(findProduct);
     }
     const resultProduct = listProduct.filter((p) => {
-      return p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-    })
+      return (
+        p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
+      );
+    });
     const listCart = [];
     for (let index = 0; index < resultProduct.length; index++) {
-      const findCart = await Cart.findOne({ productID: resultProduct[index]._id });
+      const findCart = await Cart.findOne({
+        productID: resultProduct[index]._id,
+      });
       listCart.push(findCart);
     }
     return res.json({
@@ -200,13 +223,15 @@ const AddQuantity = async (req, res, next) => {
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
     const findCart = await Cart.findOne({ _id: cartID });
-    const findProduct = await Product.findOne({ productID: findCart.productID });
+    const findProduct = await Product.findOne({
+      productID: findCart.productID,
+    });
     if (findCart.quantity < findProduct.quantity) {
       await Cart.findByIdAndUpdate(cartID, { quantity: findCart.quantity + 1 });
       return res.json({
         success: true,
         message: "Update Cart Success!!!",
-        re: findCart.quantity + 1
+        re: findCart.quantity + 1,
       });
     }
     if (findCart.quantity >= findProduct.quantity) {
@@ -216,7 +241,6 @@ const AddQuantity = async (req, res, next) => {
         message: "Update Cart Success!!!",
       });
     }
-
   } catch (error) {
     next(error);
   }
@@ -231,13 +255,15 @@ const RemoveQuantity = async (req, res, next) => {
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
     const findCart = await Cart.findOne({ _id: cartID });
-    const findProduct = await Product.findOne({ productID: findCart.productID });
+    const findProduct = await Product.findOne({
+      productID: findCart.productID,
+    });
     if (findCart.quantity <= findProduct.quantity && findCart.quantity !== 1) {
       await Cart.findByIdAndUpdate(cartID, { quantity: findCart.quantity - 1 });
       return res.json({
         success: true,
         message: "Update Cart Success!!!",
-        re: findCart.quantity - 1
+        re: findCart.quantity - 1,
       });
     }
     if (findCart.quantity === 1) {
@@ -261,5 +287,5 @@ module.exports = {
   GetAllCart,
   FindCartByID,
   AddQuantity,
-  RemoveQuantity
+  RemoveQuantity,
 };

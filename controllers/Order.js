@@ -89,6 +89,18 @@ const UpdateOrderStatus = async (req, res, next) => {
         .status(403)
         .json({ error: { message: "Người dùng chưa đăng nhập!!!" } });
     await Order.findByIdAndUpdate(orderID, { orderStatus: orderStatus });
+    if (orderStatus === "refund") {
+      const findOrderDetail = await OrderDetail.find({ orderID: orderID });
+      for (let index = 0; index < findOrderDetail.length; index++) {
+        const findProduct = await Product.findOne({
+          _id: findOrderDetail[index].productID,
+        });
+        await Product.findByIdAndUpdate(findProduct._id, {
+          quantity: findProduct.quantity + findOrderDetail[index].quantity,
+        });
+      }
+      await OrderDetail.deleteMany({ orderID: orderID });
+    }
     return res.json({
       success: true,
       message: "Update Order Success!!!",
@@ -129,7 +141,7 @@ const GetAllOrderByUserID = async (req, res, next) => {
         status: 200,
         message: "Get All Order Success!!!",
         result: result.sort(function (a, b) {
-          return b.createdAt - a.createdAt;
+          return b.dateCreated - a.dateCreated;
         }),
       });
     }
@@ -329,6 +341,159 @@ const GetCostEachUser = async (req, res, next) => {
   }
 };
 
+const GetOrderByStatus = async (req, res, next) => {
+  try {
+    const { orderStatus } = req.body;
+    const result = await Order.find({
+      orderStatus: orderStatus,
+    });
+    if (result) {
+      return res.json({
+        status: 200,
+        message: "Get All Order Success!!!",
+        result: result.sort(function (a, b) {
+          return b.dateCreated - a.dateCreated;
+        }),
+      });
+    }
+    if (!result) {
+      return res.json({
+        status: 400,
+        message: "Get All Order Success!!!",
+        result: [],
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetChart = async (req, res, next) => {
+  try {
+    const { month, year } = req.body;
+    const findOrder = await Order.find({
+      orderStatus: "received",
+    });
+
+    if (!month && !year) {
+      const now = new Date();
+      const nowmonth = now.getMonth();
+      const noyear = now.getFullYear();
+      const result = findOrder.filter((p) => {
+        return (
+          new Date(p.dateCreated).getMonth() === nowmonth &&
+          new Date(p.dateCreated).getFullYear() === noyear
+        );
+      });
+      let arr = [];
+      for (let index = 0; index < result.length; index++) {
+        arr.push({
+          time: new Date(result[index].dateCreated).getDate(),
+          value: result[index].totalMoney,
+        });
+      }
+      // let arrr = [];
+      // for (let index = 1; index < arr.length; index++) {
+      //   if (arr[index].time === arr[index - 1].time) {
+      //     arrr.push({
+      //       time: arr[index].time,
+      //       value: arr[index].value + arr[index - 1].value,
+      //     });
+      //   }
+      //   if (arr[index].time !== arr[index - 1].time) {
+      //     arrr.push({
+      //       time: arr[index].time,
+      //       value: arr[index].value,
+      //     });
+      //   }
+      // }
+
+      return res.json({
+        status: 200,
+        message: "Get All Order Success!!!",
+        result: arr.sort(function (a, b) {
+          return a.time - b.time;
+        }),
+      });
+    }
+    if (month && year) {
+      const result = findOrder.filter((p) => {
+        return (
+          new Date(p.dateCreated).getMonth() === month - 1 &&
+          new Date(p.dateCreated).getFullYear() === year
+        );
+      });
+      let arr = [];
+      for (let index = 0; index < result.length; index++) {
+        arr.push({
+          time: new Date(result[index].dateCreated).getDate(),
+          value: result[index].totalMoney,
+        });
+      }
+      // let arrr = [];
+      // for (let index = 1; index < arr.length; index++) {
+      //   if (arr[index].time === arr[index - 1].time) {
+      //     arrr.push({
+      //       time: arr[index].time,
+      //       value: arr[index].value + arr[index - 1].value,
+      //     });
+      //   }
+      //   if (arr[index].time !== arr[index - 1].time) {
+      //     arrr.push({
+      //       time: arr[index].time,
+      //       value: arr[index].value,
+      //     });
+      //   }
+      // }
+
+      return res.json({
+        status: 200,
+        message: "Get All Order Success!!!",
+        result: arr.sort(function (a, b) {
+          return a.time - b.time;
+        }),
+      });
+    }
+    if (!month && year) {
+      const result = findOrder.filter((p) => {
+        return new Date(p.dateCreated).getFullYear() === year;
+      });
+      let arr = [];
+      for (let index = 0; index < result.length; index++) {
+        arr.push({
+          time: new Date(result[index].dateCreated).getMonth() + 1,
+          value: result[index].totalMoney,
+        });
+      }
+      // let arrr = [];
+      // for (let index = 1; index < arr.length; index++) {
+      //   if (arr[index].time === arr[index - 1].time) {
+      //     arrr.push({
+      //       time: arr[index].time,
+      //       value: arr[index].value + arr[index - 1].value,
+      //     });
+      //   }
+      //   if (arr[index].time !== arr[index - 1].time) {
+      //     arrr.push({
+      //       time: arr[index].time + 1,
+      //       value: arr[index].value,
+      //     });
+      //   }
+      // }
+
+      return res.json({
+        status: 200,
+        message: "Get All Order Success!!!",
+        result: arr.sort(function (a, b) {
+          return a.time - b.time;
+        }),
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   AddOrder,
   UpdateOrderShipDate,
@@ -340,4 +505,6 @@ module.exports = {
   GetAllOrderByUserID,
   GetAllOrderByStatus,
   GetCostEachUser,
+  GetOrderByStatus,
+  GetChart,
 };

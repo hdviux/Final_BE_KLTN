@@ -30,4 +30,8 @@ router.delete(
   verifyToken.verifyToken,
   OrderDetailController.DeleteOrderDetail
 );
+router.post(
+  "/getcountpurchase",
+  OrderDetailController.GetCountPurchase
+);
 module.exports = router;

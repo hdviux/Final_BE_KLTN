@@ -258,6 +258,23 @@ const DeleteOrderDetail = async (req, res, next) => {
   }
 };
 
+const GetCountPurchase = async (req, res, next) => {
+  try {
+    const { productID } = req.body;
+    const result = await OrderDetail.find({ productID: productID });
+    let count = 0;
+    for (let index = 0; index < result.length; index++) {
+      count += result[index].quantity;
+    }
+    return res.json({
+      success: true,
+      result: count,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   AddOrderDetail,
   UpdateOrderDetail,
@@ -266,4 +283,5 @@ module.exports = {
   GetCountProductPurchsed,
   GetCountOrderProduct,
   DeleteOrderDetail,
+  GetCountPurchase,
 };

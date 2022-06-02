@@ -29,7 +29,6 @@ router.post(
   ProductController.FindProductByBrandID
 );
 router.get("/getallproduct", ProductController.GetAllProduct);
-router.post("/advancesearchproduct", ProductController.AdvanceSearchProduct);
 router.post("/checkname", ProductController.CheckName);
 
 router.post(
@@ -45,16 +44,5 @@ router.post(
   "/findproductbynamecategory",
   ProductController.FindProductByNameCategory
 );
-router.post(
-  "/findproductbynamebrandcategory",
-  ProductController.FindProductByNameBrandCategory
-);
-router.post(
-  "/findproductbynamefromtomoney",
-  ProductController.FindProductByNameFromToMoney
-);
-router.post(
-  "/getallproducthot",
-  ProductController.GetAllProductHot
-);
+router.post("/findproduct", ProductController.FindProduct);
 module.exports = router;

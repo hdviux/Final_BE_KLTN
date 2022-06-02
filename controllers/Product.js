@@ -5,17 +5,23 @@ const Category = require("../models/Category");
 const OrderDetail = require("../models/OrderDetail");
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const Discount = require("../models/Discount");
 const AddProduct = async (req, res, next) => {
+  console.log(12345);
   try {
-    const productName = req.body.productName;
-    const image = req.body.image;
-    const quantity = req.body.quantity;
-    const price = req.body.price;
-    const description = req.body.description;
-    const color = req.body.color;
-    const categoryID = req.body.categoryID;
-    const brandID = req.body.brandID;
-    if (!productName || !image || !quantity || !price || !description)
+    const {
+      productName,
+      image,
+      quantity,
+      price,
+      description,
+      color,
+      categoryID,
+      brandID,
+      age,
+    } = req.body;
+
+    if (!productName || !image || !quantity || !price || !description || !age)
       return res
         .status(400)
         .json({ error: { message: "Chưa điền đầy đủ thông tin!" } });
@@ -30,6 +36,7 @@ const AddProduct = async (req, res, next) => {
         color,
         categoryID,
         brandID,
+        age,
       });
       const result = await newProduct.save();
       const newEvaluate = new Evaluate({ productID: result._id });
@@ -94,6 +101,7 @@ const DeleteProduct = async (req, res, next) => {
       await Product.deleteOne({ _id: productID });
       await Evaluate.deleteOne({ productID: productID });
       await Cart.deleteOne({ productID: productID });
+      await Discount.deleteOne({ productID: productID });
       return res.json({
         success: true,
         message: "Delete Product Success!!!",
@@ -242,360 +250,7 @@ const GetAllProduct = async (req, res, next) => {
   }
 };
 
-const AdvanceSearchProduct = async (req, res, next) => {
-  try {
-    const { productName, fromMoney, toMoney, categoryID, brandID } = req.body;
-    if (
-      productName === "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({});
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result: findAllProduct,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({});
-      const result = findAllProduct.filter((p) => {
-        return p.price >= fromMoney && p.price <= toMoney;
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID !== "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result: findAllProduct,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID === "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        brandID: brandID,
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result: findAllProduct,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID !== "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-        brandID: brandID,
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result: findAllProduct,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID !== "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-        brandID: brandID,
-      });
-      const result = findAllProduct.filter((p) => {
-        return p.price >= fromMoney && p.price <= toMoney;
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID === "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({ brandID: brandID });
-      const result = findAllProduct.filter((p) => {
-        return p.price >= fromMoney && p.price <= toMoney;
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({});
-      const result = findAllProduct.filter((p) => {
-        return p.price >= Number(fromMoney) && p.price <= Number(toMoney);
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName === "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID !== "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-      });
-      const result = findAllProduct.filter((p) => {
-        return p.price >= fromMoney && p.price <= toMoney;
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
 
-    if (
-      productName !== "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({});
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({});
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.price >= fromMoney &&
-          p.price <= toMoney &&
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID !== "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-      });
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID === "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        brandID: brandID,
-      });
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney === 0 &&
-      toMoney === 0 &&
-      categoryID !== "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-        brandID: brandID,
-      });
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID !== "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-        brandID: brandID,
-      });
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.price >= fromMoney &&
-          p.price <= toMoney &&
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({});
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.price >= fromMoney &&
-          p.price <= toMoney &&
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID === "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({ brandID: brandID });
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.price >= fromMoney &&
-          p.price <= toMoney &&
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-    if (
-      productName !== "" &&
-      fromMoney !== 0 &&
-      toMoney !== 0 &&
-      categoryID !== "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-      });
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.price >= fromMoney &&
-          p.price <= toMoney &&
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result,
-      });
-    }
-  } catch (error) {
-    next(error);
-  }
-};
 
 const CheckName = async (req, res, next) => {
   try {
@@ -676,18 +331,13 @@ const FindProductByNameOne = async (req, res, next) => {
 };
 const FindProductByNameCategory = async (req, res, next) => {
   try {
-    const { productName, categoryID } = req.body;
+    const { categoryID } = req.body;
     const findAllProduct = await Product.find({ categoryID: categoryID });
     if (findAllProduct) {
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
       return res.json({
         success: true,
         message: "Find Product Success!!!",
-        result,
+        result: findAllProduct,
       });
     }
     if (!findAllProduct) {
@@ -704,18 +354,13 @@ const FindProductByNameCategory = async (req, res, next) => {
 
 const FindProductByNameBrand = async (req, res, next) => {
   try {
-    const { productName, brandID } = req.body;
+    const { brandID } = req.body;
     const findAllProduct = await Product.find({ brandID: brandID });
     if (findAllProduct) {
-      const result = findAllProduct.filter((p) => {
-        return (
-          p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
-        );
-      });
       return res.json({
         success: true,
         message: "Find Product Success!!!",
-        result,
+        result: findAllProduct,
       });
     }
     if (!findAllProduct) {
@@ -730,15 +375,389 @@ const FindProductByNameBrand = async (req, res, next) => {
   }
 };
 
-const FindProductByNameBrandCategory = async (req, res, next) => {
+// const FindProductByNameBrandCategory = async (req, res, next) => {
+//   try {
+//     const { productName, brandID, categoryID } = req.body;
+//     const findAllProduct = await Product.find({
+//       brandID: brandID,
+//       categoryID: categoryID,
+//     });
+//     if (findAllProduct) {
+//       const result = findAllProduct.filter((p) => {
+//         return (
+//           p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
+//         );
+//       });
+//       return res.json({
+//         success: true,
+//         message: "Find Product Success!!!",
+//         result,
+//       });
+//     }
+//     if (!findAllProduct) {
+//       return res.json({
+//         success: true,
+//         message: "Find Product Success!!!",
+//         result: [],
+//       });
+//     }
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// const FindProductByNameFromToMoney = async (req, res, next) => {
+//   try {
+//     const { productName, fromMoney, toMoney, categoryID, brandID } = req.body;
+//     if (
+//       productName.length === 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID === "" &&
+//       brandID === ""
+//     ) {
+//       const findAllProduct = await Product.find({});
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return p.price >= fromMoney && p.price <= toMoney;
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+//     if (
+//       productName.length === 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID !== "" &&
+//       brandID === ""
+//     ) {
+//       const findAllProduct = await Product.find({ categoryID: categoryID });
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return (
+//             p.price >= fromMoney &&
+//             p.price <= toMoney &&
+//             p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
+//               -1
+//           );
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+
+//     if (
+//       productName.length === 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID === "" &&
+//       brandID !== ""
+//     ) {
+//       const findAllProduct = await Product.find({ brandID: brandID });
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return (
+//             p.price >= fromMoney &&
+//             p.price <= toMoney &&
+//             p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
+//               -1
+//           );
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+//     if (
+//       productName.length === 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID !== "" &&
+//       brandID !== ""
+//     ) {
+//       const findAllProduct = await Product.find({
+//         categoryID: categoryID,
+//         brandID: brandID,
+//       });
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return (
+//             p.price >= fromMoney &&
+//             p.price <= toMoney &&
+//             p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
+//               -1
+//           );
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+//     if (
+//       productName.length !== 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID === "" &&
+//       brandID === ""
+//     ) {
+//       const findAllProduct = await Product.find({ productName: productName });
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return p.price >= fromMoney && p.price <= toMoney;
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+//     if (
+//       productName.length !== 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID !== "" &&
+//       brandID === ""
+//     ) {
+//       const findAllProduct = await Product.find({
+//         productName: productName,
+//         categoryID: categoryID,
+//       });
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return (
+//             p.price >= fromMoney &&
+//             p.price <= toMoney &&
+//             p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
+//               -1
+//           );
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+//     if (
+//       productName.length !== 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID === "" &&
+//       brandID !== ""
+//     ) {
+//       const findAllProduct = await Product.find({
+//         productName: productName,
+//         brandID: brandID,
+//       });
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return (
+//             p.price >= fromMoney &&
+//             p.price <= toMoney &&
+//             p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
+//               -1
+//           );
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+
+//     if (
+//       productName.length !== 0 &&
+//       fromMoney &&
+//       toMoney &&
+//       categoryID !== "" &&
+//       brandID !== ""
+//     ) {
+//       const findAllProduct = await Product.find({
+//         productName: productName,
+//         categoryID: categoryID,
+//         brandID: brandID,
+//       });
+//       if (findAllProduct) {
+//         const result = findAllProduct.filter((p) => {
+//           return (
+//             p.price >= fromMoney &&
+//             p.price <= toMoney &&
+//             p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
+//               -1
+//           );
+//         });
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result,
+//         });
+//       }
+
+//       if (!findAllProduct) {
+//         return res.json({
+//           success: true,
+//           message: "Find Product Success!!!",
+//           result: [],
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// const GetAllProductHot = async (req, res, next) => {
+//   try {
+//     const allProduct = await Product.find({});
+//     const arr = [];
+
+//     for (let index = 0; index < allProduct.length; index++) {
+//       let quan = 0;
+//       const findOrderDetail = await OrderDetail.find({
+//         productID: allProduct[index]._id,
+//       });
+//       for (let i = 0; i < findOrderDetail.length; i++) {
+//         quan += findOrderDetail[i].quantity;
+//       }
+//       arr.push({
+//         pid: allProduct[index]._id,
+//         quan: quan,
+//       });
+//     }
+//     arr.sort(function (a, b) {
+//       return b.quan - a.quan;
+//     });
+//     let arr2 = [];
+//     for (let index = 0; index < 4; index++) {
+//       const findProduct = await Product.findOne({
+//         _id: arr[index].pid,
+//       });
+//       arr2.push(findProduct);
+//     }
+//     return res.json({
+//       success: true,
+//       message: "Get All Product Success!!!",
+//       result: arr2,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+const FindProduct = async (req, res, next) => {
   try {
-    const { productName, brandID, categoryID } = req.body;
-    const findAllProduct = await Product.find({
-      brandID: brandID,
-      categoryID: categoryID,
-    });
-    if (findAllProduct) {
-      const result = findAllProduct.filter((p) => {
+    const { preData, type, age, brandID, categoryID, fMoney, tMoney, productName } =
+      req.body;
+    if (type === "money") {
+      const result = preData.filter((p) => {
+        return p.price >= fMoney && p.price <= tMoney;
+      });
+      return res.json({
+        success: true,
+        message: "Find Product Success!!!",
+        result,
+      });
+    }
+    if (type === "age") {
+      const result = preData.filter((p) => {
+        return p.age === age;
+      });
+      return res.json({
+        success: true,
+        message: "Find Product Success!!!",
+        result,
+      });
+    }
+    if (type === "category") {
+      const result = preData.filter((p) => {
+        return p.categoryID === categoryID;
+      });
+      return res.json({
+        success: true,
+        message: "Find Product Success!!!",
+        result,
+      });
+    }
+    if (type === "brand") {
+      const result = preData.filter((p) => {
+        return p.brandID === brandID;
+      });
+      return res.json({
+        success: true,
+        message: "Find Product Success!!!",
+        result,
+      });
+    }
+    if (type === "name") {
+      const result = preData.filter((p) => {
         return (
           p.productName.toLowerCase().indexOf(productName.toLowerCase()) !== -1
         );
@@ -749,325 +768,10 @@ const FindProductByNameBrandCategory = async (req, res, next) => {
         result,
       });
     }
-    if (!findAllProduct) {
-      return res.json({
-        success: true,
-        message: "Find Product Success!!!",
-        result: [],
-      });
-    }
   } catch (error) {
     next(error);
   }
 };
-
-const FindProductByNameFromToMoney = async (req, res, next) => {
-  try {
-    const { productName, fromMoney, toMoney, categoryID, brandID } = req.body;
-    if (
-      productName.length === 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({});
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return p.price >= fromMoney && p.price <= toMoney;
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-    if (
-      productName.length === 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID !== "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({ categoryID: categoryID });
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return (
-            p.price >= fromMoney &&
-            p.price <= toMoney &&
-            p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
-              -1
-          );
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-
-    if (
-      productName.length === 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID === "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({ brandID: brandID });
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return (
-            p.price >= fromMoney &&
-            p.price <= toMoney &&
-            p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
-              -1
-          );
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-    if (
-      productName.length === 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID !== "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        categoryID: categoryID,
-        brandID: brandID,
-      });
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return (
-            p.price >= fromMoney &&
-            p.price <= toMoney &&
-            p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
-              -1
-          );
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-    if (
-      productName.length !== 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID === "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({ productName: productName });
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return p.price >= fromMoney && p.price <= toMoney;
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-    if (
-      productName.length !== 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID !== "" &&
-      brandID === ""
-    ) {
-      const findAllProduct = await Product.find({
-        productName: productName,
-        categoryID: categoryID,
-      });
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return (
-            p.price >= fromMoney &&
-            p.price <= toMoney &&
-            p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
-              -1
-          );
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-    if (
-      productName.length !== 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID === "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        productName: productName,
-        brandID: brandID,
-      });
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return (
-            p.price >= fromMoney &&
-            p.price <= toMoney &&
-            p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
-              -1
-          );
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-
-    if (
-      productName.length !== 0 &&
-      fromMoney &&
-      toMoney &&
-      categoryID !== "" &&
-      brandID !== ""
-    ) {
-      const findAllProduct = await Product.find({
-        productName: productName,
-        categoryID: categoryID,
-        brandID: brandID,
-      });
-      if (findAllProduct) {
-        const result = findAllProduct.filter((p) => {
-          return (
-            p.price >= fromMoney &&
-            p.price <= toMoney &&
-            p.productName.toLowerCase().indexOf(productName.toLowerCase()) !==
-              -1
-          );
-        });
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result,
-        });
-      }
-
-      if (!findAllProduct) {
-        return res.json({
-          success: true,
-          message: "Find Product Success!!!",
-          result: [],
-        });
-      }
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
-const GetAllProductHot = async (req, res, next) => {
-  try {
-    const allProduct = await Product.find({});
-    const arr = [];
-
-    for (let index = 0; index < allProduct.length; index++) {
-      let quan = 0;
-      const findOrderDetail = await OrderDetail.find({
-        productID: allProduct[index]._id,
-      });
-      for (let i = 0; i < findOrderDetail.length; i++) {
-        quan += findOrderDetail[i].quantity;
-      }
-      arr.push({
-        pid: allProduct[index]._id,
-        quan: quan,
-      });
-    }
-    arr.sort(function (a, b) {
-      return b.quan - a.quan;
-    });
-    let arr2 = [];
-    for (let index = 0; index < 4; index++) {
-      const findProduct = await Product.findOne({
-        _id: arr[index].pid,
-      });
-      arr2.push(findProduct);
-    }
-    return res.json({
-      success: true,
-      message: "Get All Product Success!!!",
-      result: arr2,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   AddProduct,
   UpdateProduct,
@@ -1077,13 +781,10 @@ module.exports = {
   FindProductByCategoryID,
   FindProductByBrandID,
   GetAllProduct,
-  AdvanceSearchProduct,
   CheckName,
   FindProductByNameAndCategoryID,
   FindProductByNameOne,
   FindProductByNameCategory,
   FindProductByNameBrand,
-  FindProductByNameBrandCategory,
-  FindProductByNameFromToMoney,
-  GetAllProductHot,
+  FindProduct,
 };
