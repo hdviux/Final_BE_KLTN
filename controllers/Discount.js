@@ -123,11 +123,18 @@ const FindProductDiscount = async (req, res, next) => {
   try {
     const allDiscount = await Discount.find({});
     let arr = [];
-    for (let index = 0; index < allDiscount.length; index++) {
-      const getProduct = await Product.findOne({
-        _id: allDiscount[index].productID,
-      });
-      arr.push(getProduct);
+    let productID = [];
+    for(const discount of allDiscount) {
+      productID.push(discount.productID);
+    }
+    const products = await Product.find({
+      _id: {
+        $in:[...productID],
+      },
+      active:true,
+    });
+    for(const product of products) {
+      arr.push(product);
     }
     if (allDiscount) {
       return res.json({

@@ -45,4 +45,5 @@ router.post(
   ProductController.FindProductByNameCategory
 );
 router.post("/findproduct", ProductController.FindProduct);
+router.post("/getproducthot", ProductController.GetProductHot);
 module.exports = router;
