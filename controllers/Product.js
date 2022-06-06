@@ -448,19 +448,19 @@ const GetProductHot = async (req, res, next) => {
     const findAllEvaluate = await Evaluate.find({});
     let arr = [];
     for (let i = 0; i < findAllProduct.length; i++) {
-          arr.push({
-            _id: findAllProduct[i]._id,
-            productName: findAllProduct[i].productName,
-            image: findAllProduct[i].image,
-            quantity: findAllProduct[i].quantity,
-            price: findAllProduct[i].price,
-            description: findAllProduct[i].description,
-            categoryID: findAllProduct[i].categoryID,
-            brandID: findAllProduct[i].brandID,
-            age: findAllProduct[i].age,
-            avgEvaluate: findAllEvaluate[i].avgEvaluate,
-            totalCount: findAllEvaluate[i].totalCount,
-          });
+      arr.push({
+        _id: findAllProduct[i]._id,
+        productName: findAllProduct[i].productName,
+        image: findAllProduct[i].image,
+        quantity: findAllProduct[i].quantity,
+        price: findAllProduct[i].price,
+        description: findAllProduct[i].description,
+        categoryID: findAllProduct[i].categoryID,
+        brandID: findAllProduct[i].brandID,
+        age: findAllProduct[i].age,
+        avgEvaluate: findAllEvaluate[i].avgEvaluate,
+        totalCount: findAllEvaluate[i].totalCount,
+      });
     }
     if (findAllProduct) {
       arr.sort(function (a, b) {
@@ -475,6 +475,61 @@ const GetProductHot = async (req, res, next) => {
     if (!findAllProduct) {
       return res.json({
         success: true,
+        message: "Find Product Success!!!",
+        result: [],
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+const GetProductSameCategory = async (req, res, next) => {
+  try {
+    const { categoryID } = req.body;
+    const findAllProduct = await Product.find({ categoryID: categoryID });
+
+    let productID = [];
+    for (const product of findAllProduct) {
+      productID.push(product._id);
+    }
+
+    const findAllEvaluate = await Evaluate.find({
+      productID: {
+        $in: [...productID],
+      },
+      active: true,
+    });
+
+    let arr = [];
+    for (let i = 0; i < findAllProduct.length; i++) {
+      arr.push({
+        _id: findAllProduct[i]._id,
+        productName: findAllProduct[i].productName,
+        image: findAllProduct[i].image,
+        quantity: findAllProduct[i].quantity,
+        price: findAllProduct[i].price,
+        description: findAllProduct[i].description,
+        categoryID: findAllProduct[i].categoryID,
+        brandID: findAllProduct[i].brandID,
+        age: findAllProduct[i].age,
+        avgEvaluate: findAllEvaluate[i].avgEvaluate,
+        totalCount: findAllEvaluate[i].totalCount,
+      });
+    }
+    if (arr.length !== 0) {
+      arr.sort(function (a, b) {
+        return b.avgEvaluate - a.avgEvaluate;
+      });
+      return res.json({
+        success: true,
+        message: "Find Product Success!!!",
+        result: arr.slice(0, 5),
+      });
+    }
+    if (rr.length === 0) {
+      return res.json({
+        success: false,
         message: "Find Product Success!!!",
         result: [],
       });
@@ -500,4 +555,5 @@ module.exports = {
   FindProductByNameBrand,
   FindProduct,
   GetProductHot,
+  GetProductSameCategory
 };

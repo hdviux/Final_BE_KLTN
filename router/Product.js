@@ -46,4 +46,5 @@ router.post(
 );
 router.post("/findproduct", ProductController.FindProduct);
 router.post("/getproducthot", ProductController.GetProductHot);
+router.post("/getproductsamecategory", ProductController.GetProductSameCategory);
 module.exports = router;
