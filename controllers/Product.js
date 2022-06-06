@@ -448,8 +448,6 @@ const GetProductHot = async (req, res, next) => {
     const findAllEvaluate = await Evaluate.find({});
     let arr = [];
     for (let i = 0; i < findAllProduct.length; i++) {
-      for (let j = 0; j < findAllEvaluate.length; j++) {
-        if (i === j) {
           arr.push({
             _id: findAllProduct[i]._id,
             productName: findAllProduct[i].productName,
@@ -460,11 +458,9 @@ const GetProductHot = async (req, res, next) => {
             categoryID: findAllProduct[i].categoryID,
             brandID: findAllProduct[i].brandID,
             age: findAllProduct[i].age,
-            avgEvaluate: findAllEvaluate[j].avgEvaluate,
-            totalCount: findAllEvaluate[j].totalCount,
+            avgEvaluate: findAllEvaluate[i].avgEvaluate,
+            totalCount: findAllEvaluate[i].totalCount,
           });
-        }
-      }
     }
     if (findAllProduct) {
       arr.sort(function (a, b) {
