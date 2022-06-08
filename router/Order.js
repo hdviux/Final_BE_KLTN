@@ -50,4 +50,5 @@ router.post(
 );
 router.post("/getorderbystatus", OrderController.GetOrderByStatus);
 router.post("/getchart", OrderController.GetChart);
+router.post("/createorderbill", OrderController.CreateOrderBill);
 module.exports = router;

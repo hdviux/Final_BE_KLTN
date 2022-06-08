@@ -27,6 +27,8 @@
     "nodemon": "^2.0.15",
     "path": "^0.12.7",
     "paypal-rest-sdk": "^1.8.1",
+    "pdf-creator-node": "^2.3.4",
+    "pdfkit-table": "^0.1.99",
     "twilio": "^3.75.1",
     "uuid": "^8.3.2"
   }

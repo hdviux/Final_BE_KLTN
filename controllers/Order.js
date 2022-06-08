@@ -3,6 +3,10 @@ const User = require("../models/User");
 const OrderDetail = require("../models/OrderDetail");
 const Product = require("../models/Product");
 const sgMail = require("@sendgrid/mail");
+const fs = require("fs");
+const pdf = require("pdf-creator-node");
+const options = require("../helper/option");
+const path = require("path");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const AddOrder = async (req, res, next) => {
   try {
@@ -494,6 +498,63 @@ const GetChart = async (req, res, next) => {
   }
 };
 
+const CreateOrderBill = async (req, res, next) => {
+  try {
+    const { orderID, pay } = req.body;
+    const findOrder = await Order.findOne({
+      _id: orderID,
+    });
+    const findOrderDetail = await OrderDetail.find({ orderID: orderID });
+    const ar = [];
+    for (let index = 0; index < findOrderDetail.length; index++) {
+      const findProduct = await Product.findOne({
+        _id: findOrderDetail[index].productID,
+      });
+      ar.push({
+        _id: findProduct._id,
+        image: findProduct.image[0],
+        productName: findProduct.productName,
+        uniCost: findOrderDetail[index].uniCost,
+        quantity: findOrderDetail[index].quantity,
+        totalMoney: findOrderDetail[index].totalMoney,
+      });
+    }
+    const datecre = new Date(findOrder.dateCreated);
+    const yyyy = datecre.getFullYear();
+    const mm = datecre.getMonth() + 1;
+    const dd = datecre.getDate();
+    const foundUserReceived = await User.findOne({ _id: findOrder.userID });
+    const html = fs.readFileSync(
+      path.join(__dirname, "../Template/template.html"),
+      "utf-8"
+    );
+    const document = {
+      html: html,
+      data: {
+        user: {
+          id: orderID,
+          name: foundUserReceived.userName,
+          phone: foundUserReceived.phone,
+          address: foundUserReceived.address,
+          date: `${dd}/${mm}/${yyyy}`,
+          pay: pay,
+          money: findOrder.totalMoney,
+        },
+        orderdetais: ar,
+      },
+      path: "./Bill/" + `Bill.pdf`,
+    };
+    const create = await pdf.create(document, options);
+    return res.json({
+      status: 200,
+      message: "OK!!!",
+      result: create.filename,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   AddOrder,
   UpdateOrderShipDate,
@@ -507,4 +568,5 @@ module.exports = {
   GetCostEachUser,
   GetOrderByStatus,
   GetChart,
+  CreateOrderBill,
 };

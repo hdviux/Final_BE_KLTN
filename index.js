@@ -3,6 +3,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const useRouter = require("./router/index");
 const cors = require("cors");
+const path = require('path');
 const app = express();
 const connectDB = async () => {
   try {
@@ -21,5 +22,5 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 app.use("/", useRouter);
-
+app.use('/Bill', express.static(path.join(__dirname, 'Bill')));
 app.listen(process.env.PORT || 5000, () => console.log("Server started!!!"));
